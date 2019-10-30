@@ -1,5 +1,6 @@
 <?php
 	// make PHP / CURL compliant with multidimensional arrays
+	// to be replaced by a simpler and cleaner method with Guzzle or Requests
 	function curl_setopt_custom_postfields($ch, $postfields, $headers = null) {
 		$algos = hash_algos();
 		$hashAlgo = null;

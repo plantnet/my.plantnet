@@ -67,6 +67,7 @@
                         ]
                     );
                     $response = json_decode($apiRequest->getBody(), true);
+                    // display identification results if any
                     if (! empty($response['results'])) {
                         $results = array_slice($response['results'], 0, 3); // keep 3 best results
                         echo '<h2>Results</h2>';
@@ -85,14 +86,6 @@
                 }
             }
         ?>
-
-        <!-- display identification results if any -->
-        <?php
-            if ($response) {
-               
-            }
-            ?>
-
     </body>
 
 </html>

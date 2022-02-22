@@ -29,8 +29,19 @@ Two options:
 
 ## Web page integration
 
+To integrate Pl@ntNet identification to your Web page, you are greatly encouraged to deploy this ready-to-use component: https://github.com/plantnet/ai-taxonomist-webcomponent
+
+If it does not fit your needs, see below for other ways to integrate Pl@ntNet to your Web page
 ### HTML / PHP
 [Example](examples/web/index.php) of a Web page integration using HTML and PHP
+
+## Benchmark / batch processing
+How to run Pl@ntNet identification on a set of images, with or without a ground-truth to assess results quality.
+
+See [benchmark documentation](benchmark/README.md)
+
+### Node.js
+[Benchmark script](benchmark/js/benchmark.js) using Node.js
 
 ## Third-party libraries
 

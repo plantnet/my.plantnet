@@ -20,7 +20,7 @@ async function main() {
         const stats = fs.statSync(subFolderPath);
         // exclude non-folders
         if (! stats.isDirectory()) continue;
-        const expectedSpeciesLowercase = subFolder.replace('_', ' ');
+        const expectedSpeciesLowercase = subFolder.replace('_', ' ').toLowerCase();
         const files = fs.readdirSync(subFolderPath);
         for (const fileName of files) {
             const filePath = subFolderPath + '/' + fileName;

@@ -25,59 +25,39 @@ async function main() {
         const files = fs.readdirSync(subFolderPath);
         for (const fileName of files) {
             const filePath = subFolderPath + '/' + fileName;
-            // exclude non-images (JPEG / PNG)
-            const mimeType = mime.lookup(filePath);
-            if (! [ "image/jpeg", "image/png" ].includes(mimeType)) continue;
-            for (const project of projects) {
-                const url = baseUrl + '/' + project + '?api-key=' + API_KEY;
-                const organ = 'auto';
-                const resp = await sendPost(url, filePath, organ);
-                if (resp) {
-                    let isTop1 = false;
-                    let isInTop5 = false;
-                    let rank = '-';
-                    const { status, data } = resp;
-                    console.log(fileName + ' : OK', status);
-                    if (status === 200 && data && Array.isArray(data.results) && data.results.length > 0) {
-                        const resultsLineHeader = [
-                            expectedSpeciesLowercase,
-                            fileName,
-                            project,
-                            // organ
-                        ];
-                        let resultsLine = [];
-                        for (let i=0; i < resultsLimit; i++) {
-                            let topN = [ '-', '-' ];
-                            if (data.results.length > i) {
-                                topN = [
-                                    data.results[i].species.scientificName,
-                                    data.results[i].score
-                                ];
-                                const speciesName = data.results[i].species.scientificNameWithoutAuthor.toLowerCase();
-                                if (i == 0) {
-                                    isTop1 = (speciesName === expectedSpeciesLowercase);
-                                }
-                                if (i < 5) {
-                                    isInTop5 = isInTop5 || (speciesName === expectedSpeciesLowercase);
-                                }
-                                if (speciesName === expectedSpeciesLowercase) {
-                                    rank = i+1;
-                                }
-                            }
-                            resultsLine = [...resultsLine, ...topN];
-                        }
-                        resultsLine = [...resultsLineHeader, ...[ isTop1, isInTop5, rank ], ...resultsLine];
-                        results.push(resultsLine);
+            const sfStats = fs.statSync(filePath);
+            // is it another subfolder ?
+            if (sfStats.isDirectory()) {
+                // multi-images identification request
+                console.log('==== (multi) ' + fileName);
+                const subFiles = fs.readdirSync(filePath);
+                const images = [];
+                for (const subFileName of subFiles) {
+                    const subFilePath = filePath + '/' + subFileName;
+                    const mimeType = mime.lookup(subFilePath);
+                    // exclude non-images (JPEG / PNG)
+                    if ([ "image/jpeg", "image/png" ].includes(mimeType)) {
+                        images.push(subFilePath);
                     }
-                } else {
-                    console.error(fileName + ' : FAILED');
-                    results.push([
-                        expectedSpeciesLowercase,
-                        fileName,
-                        project,
-                        // organ,
-                        'FAILED'
-                    ]);
+                }
+                if (images.length > 0) {
+                    for (const project of projects) {
+                        const url = baseUrl + '/' + project + '?api-key=' + API_KEY;
+                        const organs = []; // auto
+                        const resp = await sendMultiPost(url, images, organs);
+                        processResponse(resp, expectedSpeciesLowercase, fileName, project);
+                    }
+                }
+            } else {
+                // single image identification request
+                const mimeType = mime.lookup(filePath);
+                // exclude non-images (JPEG / PNG)
+                if (! [ "image/jpeg", "image/png" ].includes(mimeType)) continue;
+                for (const project of projects) {
+                    const url = baseUrl + '/' + project + '?api-key=' + API_KEY;
+                    const organ = 'auto';
+                    const resp = await sendPost(url, filePath, organ);
+                    processResponse(resp, expectedSpeciesLowercase, fileName, project);
                 }
             }
         }
@@ -113,6 +93,82 @@ async function sendPost(url, image, organ='auto') {
 		console.error(error.response.data || error);
 		// throw error;
 	}
+}
+
+async function sendMultiPost(url, images, organs=[]) {
+    const form = new formData();
+    if (organs.length > 0) {
+        if (organs.length !== images.length) {
+            throw new Error('organs length must be equal to images length');
+        }
+        for (const organ of organs) {
+            form.append('organs', organ);
+        }
+    }
+    for (const image of images) {
+	    form.append('images', fs.createReadStream(image));
+    }
+	try {
+		const source = axios.CancelToken.source();
+		const { status, data } = await axios.post(url, form, {
+			cancelToken: source.token,
+			headers: form.getHeaders()
+		});
+		return { status, data };
+	} catch (error) {
+		console.error(error.response.data || error);
+		// throw error;
+	}
+}
+
+function processResponse(resp, expectedSpeciesLowercase, fileName, project) {
+    if (resp) {
+        let isTop1 = false;
+        let isInTop5 = false;
+        let rank = '-';
+        const { status, data } = resp;
+        console.log(fileName + ' : OK', status);
+        if (status === 200 && data && Array.isArray(data.results) && data.results.length > 0) {
+            const resultsLineHeader = [
+                expectedSpeciesLowercase,
+                fileName,
+                project,
+                // organ
+            ];
+            let resultsLine = [];
+            for (let i=0; i < resultsLimit; i++) {
+                let topN = [ '-', '-' ];
+                if (data.results.length > i) {
+                    topN = [
+                        data.results[i].species.scientificName,
+                        data.results[i].score
+                    ];
+                    const speciesName = data.results[i].species.scientificNameWithoutAuthor.toLowerCase();
+                    if (i == 0) {
+                        isTop1 = (speciesName === expectedSpeciesLowercase);
+                    }
+                    if (i < 5) {
+                        isInTop5 = isInTop5 || (speciesName === expectedSpeciesLowercase);
+                    }
+                    if (speciesName === expectedSpeciesLowercase) {
+                        rank = i+1;
+                    }
+                }
+                resultsLine = [...resultsLine, ...topN];
+            }
+            resultsLine = [...resultsLineHeader, ...[ isTop1, isInTop5, rank ], ...resultsLine];
+            results.push(resultsLine);
+        }
+    } else {
+        console.error(fileName + ' : FAILED');
+        results.push([
+            expectedSpeciesLowercase,
+            fileName,
+            project,
+            // organ,
+            'FAILED'
+        ]);
+    }
 }
 
 main();

@@ -72,3 +72,16 @@ Results in CSV format are written to file `./plantnet_benchmark_{date-time}.csv`
 #### run
 
 `nodejs benchmark.js`
+
+### R
+[Benchmark script](benchmark/R/benchmark.R) using R
+
+#### install
+```R
+install.packages("httr")
+install.packages("wand")
+```
+
+#### run
+
+`Rscript benchmark.R`

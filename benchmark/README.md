@@ -64,7 +64,7 @@ Results in CSV format are written to file `./plantnet_benchmark_{date-time}.csv`
 ## code
 
 ### Node.js
-[Benchmark script](benchmark/js/benchmark.js) using Node.js
+[Benchmark script](js/benchmark.js) using Node.js
 
 #### install
 `npm install`
@@ -74,7 +74,7 @@ Results in CSV format are written to file `./plantnet_benchmark_{date-time}.csv`
 `nodejs benchmark.js`
 
 ### R
-[Benchmark script](benchmark/R/benchmark.R) using R
+[Benchmark script](R/benchmark.R) using R
 
 #### install
 ```R

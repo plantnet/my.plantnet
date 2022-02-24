@@ -10,7 +10,9 @@ const mainFolderPath = '/data/pn-benchmark/images';
 const outputFilesPath = '/data/pn-benchmark';
 const projects = [ 'all'/*, 'the-plant-list'*/ ];
 const resultsLimit = 5;
+const maxParallelQueries = 1; // try 5 or 10
 
+let tasks = [];
 const results = [];
 
 async function main() {
@@ -44,8 +46,7 @@ async function main() {
                     for (const project of projects) {
                         const url = baseUrl + '/' + project + '?api-key=' + API_KEY;
                         const organs = []; // auto
-                        const resp = await sendMultiPost(url, images, organs);
-                        processResponse(resp, expectedSpeciesLowercase, fileName, project);
+                        await parallelize(sendMultiPost(url, images, organs), expectedSpeciesLowercase, fileName, project);
                     }
                 }
             } else {
@@ -56,11 +57,15 @@ async function main() {
                 for (const project of projects) {
                     const url = baseUrl + '/' + project + '?api-key=' + API_KEY;
                     const organ = 'auto';
-                    const resp = await sendPost(url, filePath, organ);
-                    processResponse(resp, expectedSpeciesLowercase, fileName, project);
+                    await parallelize(sendPost(url, filePath, organ), expectedSpeciesLowercase, fileName, project);
                 }
             }
         }
+    }
+
+    // process remaining parallel tasks if any
+    if (tasks.length > 0) {
+        await processTasks();
     }
 
     // convert to CSV
@@ -119,6 +124,26 @@ async function sendMultiPost(url, images, organs=[]) {
 		console.error(error.response.data || error);
 		// throw error;
 	}
+}
+
+async function parallelize(task, expectedSpeciesLowercase, fileName, project) {
+    tasks.push({
+        task,
+        expectedSpeciesLowercase,
+        fileName,
+        project
+    });
+    if (tasks.length >= maxParallelQueries) {
+        await processTasks();
+    }
+}
+
+async function processTasks() {
+    const responses = await Promise.all(tasks.map(t => t.task));
+    for (const [i, resp] of responses.entries()) {
+        processResponse(resp, tasks[i].expectedSpeciesLowercase, tasks[i].fileName, tasks[i].project);
+    }
+    tasks = [];
 }
 
 function processResponse(resp, expectedSpeciesLowercase, fileName, project) {

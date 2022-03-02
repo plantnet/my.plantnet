@@ -69,7 +69,7 @@ async function main() {
     }
 
     // convert to CSV
-    let CSVdata = 'subfolder;image;project;is top1;in top5;rank'; // headers
+    let CSVdata = 'subfolder;image;project;is top1;in top5;rank;match score'; // headers
     for (let i = 0; i < resultsLimit; i++) {
         CSVdata += `;r${i+1} name; r${i+1} score`;
     }
@@ -151,6 +151,7 @@ function processResponse(resp, expectedSpeciesLowercase, fileName, project) {
         let isTop1 = false;
         let isInTop5 = false;
         let rank = '-';
+        let matchScore = '-';
         const { status, data } = resp;
         console.log(fileName + ' : OK', status);
         if (status === 200 && data && Array.isArray(data.results) && data.results.length > 0) {
@@ -177,11 +178,12 @@ function processResponse(resp, expectedSpeciesLowercase, fileName, project) {
                     }
                     if (speciesName === expectedSpeciesLowercase) {
                         rank = i+1;
+                        matchScore = data.results[i].score;
                     }
                 }
                 resultsLine = [...resultsLine, ...topN];
             }
-            resultsLine = [...resultsLineHeader, ...[ isTop1, isInTop5, rank ], ...resultsLine];
+            resultsLine = [...resultsLineHeader, ...[ isTop1, isInTop5, rank, matchScore ], ...resultsLine];
             results.push(resultsLine);
         }
     } else {

@@ -80,6 +80,10 @@ Results in CSV format are written to file `./plantnet_benchmark_{date-time}.csv`
 ### R
 [Benchmark script](R/benchmark.R) using R
 
+R version **does not** support muti-images queries at the moment. Sub-folders inside species-names sub-folders are ignored.
+
+R version **is not** parallelised at the moment.
+
 #### install
 ```R
 install.packages("httr")

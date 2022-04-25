@@ -121,7 +121,7 @@ async function sendMultiPost(url, images, organs=[]) {
 		});
 		return { status, data };
 	} catch (error) {
-		console.error(error.response.data || error);
+		console.error(((error || {}).response || {}).data || error);
 		// throw error;
 	}
 }

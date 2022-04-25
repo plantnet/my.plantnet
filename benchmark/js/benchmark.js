@@ -3,6 +3,8 @@ import fs from 'fs';
 import formData from 'form-data';
 import mime from 'mime-types';
 
+const maxBytes = 50000000; // 50 MB for axios
+
 const API_KEY = '';
 
 const baseUrl = 'https://my-api.plantnet.org/v2/identify';
@@ -88,11 +90,17 @@ async function sendPost(url, image, organ='auto') {
 	form.append('images', fs.createReadStream(image));
 	form.append('organs', organ);
 	try {
-		const source = axios.CancelToken.source();
-		const { status, data } = await axios.post(url, form, {
-			cancelToken: source.token,
-			headers: form.getHeaders()
-		});
+		const source = axios.CancelToken.source();     
+		const { status, data } = await axios.post(
+            url,
+            form,
+            {
+                cancelToken: source.token,
+                headers: form.getHeaders(),
+                maxContentLength: maxBytes,
+                maxBodyLength: maxBytes
+            }
+        );
 		return { status, data };
 	} catch (error) {
 		console.error(error.response.data || error);
@@ -115,10 +123,16 @@ async function sendMultiPost(url, images, organs=[]) {
     }
 	try {
 		const source = axios.CancelToken.source();
-		const { status, data } = await axios.post(url, form, {
-			cancelToken: source.token,
-			headers: form.getHeaders()
-		});
+		const { status, data } = await axios.post(
+            url,
+            form,
+            {
+                cancelToken: source.token,
+                headers: form.getHeaders(),
+                maxContentLength: maxBytes,
+                maxBodyLength: maxBytes
+            }
+        );
 		return { status, data };
 	} catch (error) {
 		console.error(((error || {}).response || {}).data || error);

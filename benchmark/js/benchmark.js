@@ -5,14 +5,18 @@ import mime from 'mime-types';
 
 const maxBytes = 50000000; // 50 MB for axios
 
-const API_KEY = '';
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const env = require('./env.json');
 
-const baseUrl = 'https://my-api.plantnet.org/v2/identify';
-const mainFolderPath = '/data/pn-benchmark/images';
-const outputFilesPath = '/data/pn-benchmark';
-const projects = [ 'all'/*, 'the-plant-list'*/ ];
-const resultsLimit = 5;
-const maxParallelQueries = 1; // try 5 or 10
+const API_KEY = env.apiKey;
+
+const baseUrl = env.url;
+const mainFolderPath = env.mainFolderPath;
+const outputFilesPath = env.outputFilesPath;
+const projects = env.projects; // array of projects, ex:  [ "all", "the-plant-list" ]
+const resultsLimit = env.resultsLimit;
+const maxParallelQueries = env.maxParallelQueries; // try 5 or 10
 
 let tasks = [];
 const results = [];

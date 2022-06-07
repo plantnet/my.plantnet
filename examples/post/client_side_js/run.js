@@ -10,7 +10,6 @@ const identify = async () => {
     // 1. Get the file from an input type=file : 
     const fileInput = document.getElementById('picture');
     const images = fileInput.files;
-    console.log(typeof images, images);
     if (images.length === 0) {
         console.error('choose a file');
         return false;
@@ -39,9 +38,7 @@ const identify = async () => {
             .then((r) => {
                 document.getElementById('results').innerHTML = JSON.stringify(r);
             })
-            .catch((err) => {
-                console.error
-            });
+            .catch(console.error);
         } else {
             const resp = `status: ${response.status} (${response.statusText})`;
             document.getElementById('results').innerHTML = resp;

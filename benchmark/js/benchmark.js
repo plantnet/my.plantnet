@@ -75,7 +75,7 @@ async function main() {
     }
 
     // convert to CSV
-    let CSVdata = 'subfolder;image;project;is top1;in top5;rank;match score'; // headers
+    let CSVdata = 'subfolder;image;project;is top1;in top5;rank;genus top1;genus top5;genus rank;match score'; // headers
     for (let i = 0; i < resultsLimit; i++) {
         CSVdata += `;r${i+1} name; r${i+1} score`;
     }
@@ -169,7 +169,11 @@ function processResponse(resp, expectedSpeciesLowercase, fileName, project) {
         let isTop1 = false;
         let isInTop5 = false;
         let rank = '-';
+        let genusIsTop1 = false;
+        let genusIsInTop5 = false;
+        let genusRank = '-';
         let matchScore = '-';
+        const expectedGenusLowercase = expectedSpeciesLowercase.split(' ')[0];
         const { status, data } = resp;
         console.log(fileName + ' : OK', status);
         if (status === 200 && data && Array.isArray(data.results) && data.results.length > 0) {
@@ -188,20 +192,26 @@ function processResponse(resp, expectedSpeciesLowercase, fileName, project) {
                         data.results[i].score
                     ];
                     const speciesName = data.results[i].species.scientificNameWithoutAuthor.toLowerCase();
+                    const genusName = speciesName.split(' ')[0];
                     if (i == 0) {
                         isTop1 = (speciesName === expectedSpeciesLowercase);
+                        genusIsTop1 = (genusName === expectedGenusLowercase);
                     }
                     if (i < 5) {
                         isInTop5 = isInTop5 || (speciesName === expectedSpeciesLowercase);
+                        genusIsInTop5 = genusIsInTop5 || (genusName === expectedGenusLowercase);
                     }
                     if (speciesName === expectedSpeciesLowercase) {
                         rank = i+1;
                         matchScore = data.results[i].score;
                     }
+                    if (genusRank === '-' && genusName === expectedGenusLowercase) {
+                        genusRank = i+1;
+                    }
                 }
                 resultsLine = [...resultsLine, ...topN];
             }
-            resultsLine = [...resultsLineHeader, ...[ isTop1, isInTop5, rank, matchScore ], ...resultsLine];
+            resultsLine = [...resultsLineHeader, ...[ isTop1, isInTop5, rank, genusIsTop1, genusIsInTop5, genusRank, matchScore ], ...resultsLine];
             results.push(resultsLine);
         }
     } else {

@@ -28,6 +28,7 @@ sub_folders <- list.dirs(path = main_folder_path, recursive = FALSE)
 for (sub_folder in sub_folders) {
     subfolder_name <- tail(strsplit(sub_folder, "/")[[1]], n <- 1)
     expected_species <- tolower(sub("_", " ", subfolder_name))
+    expected_genus <- strsplit(expected_species, " ")[[1]][[1]]
     print(expected_species)
     files <- list.files(path = sub_folder, full.names = TRUE)
     for (file_path in files) {
@@ -46,6 +47,9 @@ for (sub_folder in sub_folders) {
                     is_top_1 <- FALSE
                     is_in_top_5 <- FALSE
                     rank <- "-"
+                    genus_is_top_1 <- FALSE
+                    genus_is_in_top_5 <- FALSE
+                    genus_rank <- "-"
                     match_score <- "-"
                     file_name <- tail(strsplit(file_path, "/")[[1]], n <- 1)
                     if (status == 200 && is.list(data["results"]) && length(data["results"][[1]]) > 0) {
@@ -65,20 +69,26 @@ for (sub_folder in sub_folders) {
                                     res[[1]]["score"]
                                 )
                                 species_name <- tolower(res[[1]]["species"][[1]]["scientificNameWithoutAuthor"])
+                                genus_name <- strsplit(species_name, " ")[[1]][[1]]
                                 if (i == 1) {
                                     is_top_1 <- (species_name == expected_species)
+                                    genus_is_top_1 <- (genus_name == expected_genus)
                                 }
                                 if (i <= 5) {
                                     is_in_top_5 <- is_in_top_5 || (species_name == expected_species)
+                                    genus_is_in_top_5 <- genus_is_in_top_5 || (genus_name == expected_genus)
                                 }
                                 if (species_name == expected_species) {
                                     rank <- i
                                     match_score <- res[[1]]["score"]
                                 }
+                                if (genus_rank == "-" && genus_name == expected_genus) {
+                                    genus_rank <- i 
+                                }
                             }
                             results_line <- c(results_line, top_n)
                         }
-                        results_line <- c(results_line_header, c(is_top_1, is_in_top_5), c(rank, match_score), results_line)
+                        results_line <- c(results_line_header, c(is_top_1, is_in_top_5), c(rank), c(genus_is_top_1, genus_is_in_top_5), c(genus_rank, match_score), results_line)
                         results <- append(results, list(results_line))
                     } else {
                         message(sprintf("%s : NO RESULTS", file_name))
@@ -104,7 +114,7 @@ for (sub_folder in sub_folders) {
 }
 
 # convert to CSV
-csv_data <- "subfolder/ground truth;image;project;is top1;in top5;rank;match score" # headers
+csv_data <- "subfolder/ground truth;image;project;is top1;in top5;rank;genus top1;genus top5; genus rank;match score" # headers
 for (i in 1: results_limit) {
     csv_data <- paste(csv_data, ";r", i, " name; r", i, " score", sep = "")
 }

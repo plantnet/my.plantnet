@@ -4,8 +4,10 @@
         require 'vendor/autoload.php';
 
         // CONFIGURATION
-        $API_URL = 'https://my-api.plantnet.org/v2/identify/all?api-key=';
-        $API_PRIVATE_KEY = 'your-private-api-key-here'; // secret
+        // $API_URL = 'https://my-api.plantnet.org/v2/identify/all?api-key=';
+        $API_URL = 'http://localhost:3003/v2/identify/all?api-key=';
+        // $API_PRIVATE_KEY = '2b10mKdf4670LVA2qxrkgvMD4u'; // secret
+        $API_PRIVATE_KEY = '2a10ZQBf9edNaxfpItbg9sM'; // woevre test
         $API_SIMSEARCH_OPTION = '&include-related-images=true'; // optional: get most similar images
         $API_LANG = '&lang=fr'; // default: en
     ?>

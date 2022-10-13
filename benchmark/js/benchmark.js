@@ -10,6 +10,7 @@ const require = createRequire(import.meta.url);
 const env = require('./env.json');
 
 const API_KEY = env.apiKey;
+const noReject = env.noReject;
 
 const baseUrl = env.url;
 const mainFolderPath = env.mainFolderPath;
@@ -50,7 +51,7 @@ async function main() {
                 }
                 if (images.length > 0) {
                     for (const project of projects) {
-                        const url = baseUrl + '/' + project + '?api-key=' + API_KEY;
+                        const url = baseUrl + '/' + project + '?api-key=' + API_KEY + (noReject ? '&no-reject=true' : '');
                         const organs = []; // auto
                         await parallelize(sendMultiPost(url, images, organs), expectedSpeciesLowercase, fileName, project);
                     }
@@ -61,7 +62,7 @@ async function main() {
                 // exclude non-images (JPEG / PNG)
                 if (! [ "image/jpeg", "image/png" ].includes(mimeType)) continue;
                 for (const project of projects) {
-                    const url = baseUrl + '/' + project + '?api-key=' + API_KEY;
+                    const url = baseUrl + '/' + project + '?api-key=' + API_KEY + (noReject ? '&no-reject=true' : '');
                     const organ = 'auto';
                     await parallelize(sendPost(url, filePath, organ), expectedSpeciesLowercase, fileName, project);
                 }

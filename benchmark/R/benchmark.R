@@ -9,6 +9,7 @@ output_files_path <- "/data/pn-benchmark"
 projects <- list("all")
 # projects <- list("all", "the-plant-list")
 results_limit <- 5
+no_reject <- FALSE
 
 send_post <- function(url, image, organ = "auto") {
     data <- list(
@@ -39,6 +40,9 @@ for (sub_folder in sub_folders) {
             if (! mime_type %in% c("image/jpeg", "image/png")) next
             for (project in projects) {
                 url <- paste0(base_url, "/", project, "?api-key=", API_KEY)
+                if (no_reject) {
+                    url <- paste0(url, "&no-reject=true")
+                }
                 organ <- "auto"
                 resp <- send_post(url, file_path, organ)
                 if (! is.null(resp)) {

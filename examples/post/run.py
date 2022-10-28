@@ -3,7 +3,8 @@ import json
 from pprint import pprint
 
 API_KEY = ""  # Set you API_KEY here
-api_endpoint = f"https://my-api.plantnet.org/v2/identify/all?api-key={API_KEY}"
+PROJECT = "all" # try "weurope" or "canada"
+api_endpoint = f"https://my-api.plantnet.org/v2/identify/{PROJECT}?api-key={API_KEY}"
 
 
 image_path_1 = "../data/image_1.jpeg"

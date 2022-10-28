@@ -2,7 +2,8 @@
 	// don't forget to run "composer install" first
 	require 'vendor/autoload.php';
 
-	$API_URL = 'https://my-api.plantnet.org/v2/identify/all?api-key=';
+	$PROJECT = "all"; // try "weurope" or "canada"
+	$API_URL = 'https://my-api.plantnet.org/v2/identify/' . $PROJECT . '?api-key=';
 	$API_PRIVATE_KEY = 'your-private-api-key-here'; // secret
 	$API_SIMSEARCH_OPTION = '&include-related-images=true'; // optional: get most similar images
 	$API_LANG = '&lang=fr'; // default: en

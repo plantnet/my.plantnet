@@ -1,12 +1,14 @@
 
-API_URL <- "https://my-api.plantnet.org/v2/identify/all?"
+API_URL <- "https://my-api.plantnet.org/v2/identify"
 
 key <- "" # Your API key here
+project <- "all" # try "weurope" or "canada"
 
 lang <- "fr"
 includeRelatedImages <- FALSE # try TRUE
 
 URL <- paste0(API_URL,
+        "/", project, "?",
         "lang=", lang,
         "&include-related-images=", includeRelatedImages,
         "&api-key=", key)

@@ -18,10 +18,11 @@ public class Run {
 	private static final String IMAGE2 = "../data/image_2.jpeg";
 	private static final String ORGAN2 = "leaf";
 
-	private static final String API_URL = "https://my-api.plantnet.org/v2/identify/all?api-key=";
-	private static final String API_PRIVATE_KEY = 'your-private-api-key'; // secret
-	private static final String API_SIMSEARCH_OPTION = '&include-related-images=true'; // optional: get most similar images
-	private static final String API_LANG = '&lang=fr'; // default: en
+	private static final String PROJECT = "all"; // try "weurope" or "canada"
+	private static final String API_URL = "https://my-api.plantnet.org/v2/identify/" + PROJECT + "?api-key=";
+	private static final String API_PRIVATE_KEY = "your-private-api-key"; // secret
+	private static final String API_SIMSEARCH_OPTION = "&include-related-images=true"; // optional: get most similar images
+	private static final String API_LANG = "&lang=fr"; // default: en
 
 	public static void main(String[] args) {
 		File file1 = new File(IMAGE1);

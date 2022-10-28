@@ -1,6 +1,9 @@
 
-API_URL <- "https://my-api.plantnet.org/v2/identify/all?"
+API_URL <- "https://my-api.plantnet.org/v2/identify"
+
 key <- "" # Your API key here
+project <- "all" # try "weurope" or "canada"
+
 imageURL <- "" # A JPG image URL here
 lang <- "fr"
 organs <- "flower"
@@ -9,6 +12,7 @@ includeRelatedImages <- FALSE # try TRUE
 URLencoded <- sapply(imageURL, FUN = URLencode, reserved = TRUE, repeated = TRUE)
 
 URL <- paste0(API_URL,
+        "/", project, "?",
         "images=", paste(URLencoded, collapse = "&images="),
         "&organs=", paste(organs, collapse = "&organs="),
         "&lang=", lang,

@@ -4,7 +4,8 @@ const fs = require('fs'); // File System | Node.js
 const axios = require('axios'); // HTTP client
 const FormData = require('form-data'); // Readable "multipart/form-data" streams
 
-const API_URL = 'https://my-api.plantnet.org/v2/identify/all?api-key=';
+const PROJECT = 'all'; // try 'weurope' or 'canada'
+const API_URL = 'https://my-api.plantnet.org/v2/identify/' + PROJECT + '?api-key=';
 const API_PRIVATE_KEY = 'your-private-api-key'; // secret
 const API_SIMSEARCH_OPTION = '&include-related-images=true'; // optional: get most similar images
 const API_LANG = '&lang=fr'; // default: en

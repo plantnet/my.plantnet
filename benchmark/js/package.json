@@ -1,7 +1,7 @@
 {
   "type": "module",
   "dependencies": {
-    "axios": "^0.25.0",
+    "axios": "^1.6.0",
     "form-data": "^4.0.0",
     "mime-types": "^2.1.34"
   }

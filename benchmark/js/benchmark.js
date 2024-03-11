@@ -2,12 +2,11 @@ import axios from 'axios';
 import fs from 'fs';
 import formData from 'form-data';
 import mime from 'mime-types';
+import pLimit from 'p-limit'
 
 const maxBytes = 50000000; // 50 MB for axios
 
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const env = require('./env.json');
+const env = JSON.parse(fs.readFileSync('env.json', 'utf8'))
 
 const API_KEY = env.apiKey;
 const noReject = env.noReject;
@@ -19,7 +18,9 @@ const projects = env.projects; // array of projects, ex:  [ "all", "the-plant-li
 const resultsLimit = env.resultsLimit;
 const maxParallelQueries = env.maxParallelQueries; // try 5 or 10
 
-let tasks = [];
+const concurrentTaskLimit = pLimit(maxParallelQueries);
+
+const tasks = [];
 const results = [];
 
 async function main() {
@@ -53,7 +54,7 @@ async function main() {
                     for (const project of projects) {
                         const url = baseUrl + '/' + project + '?api-key=' + API_KEY + (noReject ? '&no-reject=true' : '');
                         const organs = []; // auto
-                        await parallelize(sendMultiPost(url, images, organs), expectedSpeciesLowercase, fileName, project);
+                        parallelize(sendMultiPost(url, images, organs), expectedSpeciesLowercase, fileName, project);
                     }
                 }
             } else {
@@ -64,15 +65,18 @@ async function main() {
                 for (const project of projects) {
                     const url = baseUrl + '/' + project + '?api-key=' + API_KEY + (noReject ? '&no-reject=true' : '');
                     const organ = 'auto';
-                    await parallelize(sendPost(url, filePath, organ), expectedSpeciesLowercase, fileName, project);
+                    parallelize(sendPost(url, filePath, organ), expectedSpeciesLowercase, fileName, project);
                 }
             }
         }
     }
 
-    // process remaining parallel tasks if any
+    // process in parallel
     if (tasks.length > 0) {
-        await processTasks();
+        await Promise.all(tasks);
+    } else {
+        console.log('No images to benchmark. Exiting.');
+        return
     }
 
     // convert to CSV
@@ -95,7 +99,7 @@ async function sendPost(url, image, organ='auto') {
 	form.append('images', fs.createReadStream(image));
 	form.append('organs', organ);
 	try {
-		const source = axios.CancelToken.source();     
+		const source = axios.CancelToken.source();
 		const { status, data } = await axios.post(
             url,
             form,
@@ -146,23 +150,10 @@ async function sendMultiPost(url, images, organs=[]) {
 }
 
 async function parallelize(task, expectedSpeciesLowercase, fileName, project) {
-    tasks.push({
-        task,
-        expectedSpeciesLowercase,
-        fileName,
-        project
-    });
-    if (tasks.length >= maxParallelQueries) {
-        await processTasks();
-    }
-}
-
-async function processTasks() {
-    const responses = await Promise.all(tasks.map(t => t.task));
-    for (const [i, resp] of responses.entries()) {
-        processResponse(resp, tasks[i].expectedSpeciesLowercase, tasks[i].fileName, tasks[i].project);
-    }
-    tasks = [];
+    tasks.push(concurrentTaskLimit( async () => {
+        const response = await task;
+        processResponse(response, expectedSpeciesLowercase, fileName, project);
+    }))
 }
 
 function processResponse(resp, expectedSpeciesLowercase, fileName, project) {
@@ -193,20 +184,25 @@ function processResponse(resp, expectedSpeciesLowercase, fileName, project) {
                         data.results[i].score
                     ];
                     const speciesName = data.results[i].species.scientificNameWithoutAuthor.toLowerCase();
+                    const speciesNameWithAuthor = data.results[i].species.scientificName.toLowerCase();
                     const genusName = speciesName.split(' ')[0];
-                    if (i == 0) {
-                        isTop1 = (speciesName === expectedSpeciesLowercase);
-                        genusIsTop1 = (genusName === expectedGenusLowercase);
+
+                    const speciesNamesMatched = speciesName === expectedSpeciesLowercase || speciesNameWithAuthor === expectedSpeciesLowercase;
+                    const genusNamesMatched = genusName === expectedGenusLowercase;
+
+                    if (i === 0) {
+                        isTop1 = speciesNamesMatched;
+                        genusIsTop1 = genusNamesMatched;
                     }
                     if (i < 5) {
-                        isInTop5 = isInTop5 || (speciesName === expectedSpeciesLowercase);
-                        genusIsInTop5 = genusIsInTop5 || (genusName === expectedGenusLowercase);
+                        isInTop5 = isInTop5 || speciesNamesMatched;
+                        genusIsInTop5 = genusIsInTop5 || genusNamesMatched;
                     }
-                    if (speciesName === expectedSpeciesLowercase) {
+                    if (speciesNamesMatched) {
                         rank = i+1;
                         matchScore = data.results[i].score;
                     }
-                    if (genusRank === '-' && genusName === expectedGenusLowercase) {
+                    if (genusRank === '-' && genusNamesMatched) {
                         genusRank = i+1;
                     }
                 }

@@ -54,7 +54,7 @@ async function main() {
                     for (const project of projects) {
                         const url = baseUrl + '/' + project + '?api-key=' + API_KEY + (noReject ? '&no-reject=true' : '');
                         const organs = []; // auto
-                        parallelize(sendMultiPost(url, images, organs), expectedSpeciesLowercase, fileName, project);
+                        parallelize(() => sendMultiPost(url, images, organs), expectedSpeciesLowercase, fileName, project);
                     }
                 }
             } else {
@@ -65,7 +65,7 @@ async function main() {
                 for (const project of projects) {
                     const url = baseUrl + '/' + project + '?api-key=' + API_KEY + (noReject ? '&no-reject=true' : '');
                     const organ = 'auto';
-                    parallelize(sendPost(url, filePath, organ), expectedSpeciesLowercase, fileName, project);
+                    parallelize(() => sendPost(url, filePath, organ), expectedSpeciesLowercase, fileName, project);
                 }
             }
         }
@@ -95,6 +95,7 @@ async function main() {
 }
 
 async function sendPost(url, image, organ='auto') {
+    console.log("sending image: " + image + " to " + url)
     const form = new formData();
 	form.append('images', fs.createReadStream(image));
 	form.append('organs', organ);
@@ -151,7 +152,7 @@ async function sendMultiPost(url, images, organs=[]) {
 
 async function parallelize(task, expectedSpeciesLowercase, fileName, project) {
     tasks.push(concurrentTaskLimit( async () => {
-        const response = await task;
+        const response = await task();
         processResponse(response, expectedSpeciesLowercase, fileName, project);
     }))
 }

@@ -95,7 +95,6 @@ async function main() {
 }
 
 async function sendPost(url, image, organ='auto') {
-    console.log("sending image: " + image + " to " + url)
     const form = new formData();
 	form.append('images', fs.createReadStream(image));
 	form.append('organs', organ);

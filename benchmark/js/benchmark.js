@@ -112,7 +112,7 @@ async function sendPost(url, image, organ='auto') {
         );
 		return { status, data };
 	} catch (error) {
-		console.error(error.response.data || error);
+		console.error(error.response?.data || error);
 		// throw error;
 	}
 }

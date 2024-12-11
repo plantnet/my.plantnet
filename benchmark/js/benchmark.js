@@ -54,7 +54,7 @@ async function main() {
                     for (const project of projects) {
                         const url = baseUrl + '/' + project + '?api-key=' + API_KEY + (noReject ? '&no-reject=true' : '');
                         const organs = []; // auto
-                        parallelize(() => sendMultiPost(url, images, organs), expectedSpeciesLowercase, fileName, project);
+                        parallelize(() => sendMultiPost(url, images, organs), expectedSpeciesLowercase, fileName, project, images.length);
                     }
                 }
             } else {
@@ -65,7 +65,7 @@ async function main() {
                 for (const project of projects) {
                     const url = baseUrl + '/' + project + '?api-key=' + API_KEY + (noReject ? '&no-reject=true' : '');
                     const organ = 'auto';
-                    parallelize(() => sendPost(url, filePath, organ), expectedSpeciesLowercase, fileName, project);
+                    parallelize(() => sendPost(url, filePath, organ), expectedSpeciesLowercase, fileName, project, 1);
                 }
             }
         }
@@ -80,7 +80,7 @@ async function main() {
     }
 
     // convert to CSV
-    let CSVdata = 'subfolder;image;project;is top1;in top5;rank;genus top1;genus top5;genus rank;match score'; // headers
+    let CSVdata = 'subfolder;image;nb_images;project;is top1;in top5;rank;genus top1;genus top5;genus rank;match score'; // headers
     for (let i = 0; i < resultsLimit; i++) {
         CSVdata += `;r${i+1} name; r${i+1} score`;
     }
@@ -149,14 +149,14 @@ async function sendMultiPost(url, images, organs=[]) {
 	}
 }
 
-async function parallelize(task, expectedSpeciesLowercase, fileName, project) {
+async function parallelize(task, expectedSpeciesLowercase, fileName, project, nbImages) {
     tasks.push(concurrentTaskLimit( async () => {
         const response = await task();
-        processResponse(response, expectedSpeciesLowercase, fileName, project);
+        processResponse(response, expectedSpeciesLowercase, fileName, project, nbImages);
     }))
 }
 
-function processResponse(resp, expectedSpeciesLowercase, fileName, project) {
+function processResponse(resp, expectedSpeciesLowercase, fileName, project, nbImages) {
     if (resp) {
         let isTop1 = false;
         let isInTop5 = false;
@@ -172,6 +172,7 @@ function processResponse(resp, expectedSpeciesLowercase, fileName, project) {
             const resultsLineHeader = [
                 expectedSpeciesLowercase,
                 fileName,
+                nbImages,
                 project,
                 // organ
             ];
@@ -216,6 +217,7 @@ function processResponse(resp, expectedSpeciesLowercase, fileName, project) {
         results.push([
             expectedSpeciesLowercase,
             fileName,
+            nbImages,
             project,
             // organ,
             'FAILED'

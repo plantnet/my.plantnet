@@ -39,7 +39,7 @@ for (sub_folder in sub_folders) {
             mime_type <- wand::get_content_type(file_path)
             if (! mime_type %in% c("image/jpeg", "image/png")) next
             for (project in projects) {
-                url <- paste0(base_url, "/", project, "?api-key=", API_KEY)
+                url <- paste0(base_url, "/", project, "?api-key=", API_KEY, "&nb-results=", results_limit)
                 if (no_reject) {
                     url <- paste0(url, "&no-reject=true")
                 }

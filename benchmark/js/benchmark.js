@@ -52,7 +52,7 @@ async function main() {
                 }
                 if (images.length > 0) {
                     for (const project of projects) {
-                        const url = baseUrl + '/' + project + '?api-key=' + API_KEY + (noReject ? '&no-reject=true' : '');
+                        const url = baseUrl + '/' + project + '?api-key=' + API_KEY + '&nb-results=' + resultsLimit + (noReject ? '&no-reject=true' : '');
                         const organs = []; // auto
                         parallelize(() => sendMultiPost(url, images, organs), expectedSpeciesLowercase, fileName, project, images.length);
                     }
@@ -63,7 +63,7 @@ async function main() {
                 // exclude non-images (JPEG / PNG)
                 if (! [ "image/jpeg", "image/png" ].includes(mimeType)) continue;
                 for (const project of projects) {
-                    const url = baseUrl + '/' + project + '?api-key=' + API_KEY + (noReject ? '&no-reject=true' : '');
+                    const url = baseUrl + '/' + project + '?api-key=' + API_KEY + '&nb-results=' + resultsLimit + (noReject ? '&no-reject=true' : '');
                     const organ = 'auto';
                     parallelize(() => sendPost(url, filePath, organ), expectedSpeciesLowercase, fileName, project, 1);
                 }

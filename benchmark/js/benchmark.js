@@ -3,6 +3,7 @@ import fs from 'fs';
 import formData from 'form-data';
 import mime from 'mime-types';
 import pLimit from 'p-limit'
+import path from 'path';
 
 const maxBytes = 50000000; // 50 MB for axios
 
@@ -51,10 +52,15 @@ async function main() {
                     }
                 }
                 if (images.length > 0) {
+                    // detail images order for correspondance with predicted organs array
+                    let detailedFileName = fileName;
+                    if (env.includePredictedOrgans) {
+                        detailedFileName += ' (' + images.map((i) => path.basename(i)).join(',') + ')';
+                    }
                     for (const project of projects) {
                         const url = baseUrl + '/' + project + '?api-key=' + API_KEY + '&nb-results=' + resultsLimit + (noReject ? '&no-reject=true' : '');
                         const organs = []; // auto
-                        parallelize(() => sendMultiPost(url, images, organs), expectedSpeciesLowercase, fileName, project, images.length);
+                        parallelize(() => sendMultiPost(url, images, organs), expectedSpeciesLowercase, detailedFileName, project, images.length);
                     }
                 }
             } else {
@@ -80,7 +86,11 @@ async function main() {
     }
 
     // convert to CSV
-    let CSVdata = 'subfolder;image;nb_images;project;is top1;in top5;rank;genus top1;genus top5;genus rank;match score'; // headers
+    let CSVdata = 'subfolder;images;nb_images;project;';
+    if (env.includePredictedOrgans) {
+        CSVdata += 'predicted organs;';
+    }
+    CSVdata += 'is top1;in top5;rank;genus top1;genus top5;genus rank;match score';
     for (let i = 0; i < resultsLimit; i++) {
         CSVdata += `;r${i+1} name; r${i+1} score`;
     }
@@ -173,9 +183,17 @@ function processResponse(resp, expectedSpeciesLowercase, fileName, project, nbIm
                 expectedSpeciesLowercase,
                 fileName,
                 nbImages,
-                project,
-                // organ
+                project
             ];
+            if (env.includePredictedOrgans) {
+                if (Array.isArray(data.predictedOrgans)) {
+                    resultsLineHeader.push(
+                        data.predictedOrgans
+                            .map((po) => `${po.organ} (${po.score})`)
+                            .join(',')
+                    );
+                }
+            }
             let resultsLine = [];
             for (let i=0; i < resultsLimit; i++) {
                 let topN = [ '-', '-' ];
@@ -219,7 +237,6 @@ function processResponse(resp, expectedSpeciesLowercase, fileName, project, nbIm
             fileName,
             nbImages,
             project,
-            // organ,
             'FAILED'
         ]);
     }

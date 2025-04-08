@@ -32,6 +32,15 @@ How many possible determinations will you keep in the output table, for every im
 
 How many HTTP requests will you make to the Pl@ntNet API at once. Max 10, defaults to 1 (sequential).
 
+### noReject
+
+Set to true to get plant species results even when top1 result is a reject class (not a plant: animal, object…)
+
+### includePredictedOrgans
+
+Set to true to add a new `predicted_organs` column to the output file, containing the top1 predicted organ for each submited image, along with the prediction score.
+
+
 ### images folder
 
 Organize your image files in subfolders named after ground truth as show below. Ground truth muth be a binomial name without author, separated by space or underscore. Case does not matter. Subfolders must contain image files in JPEG or PNG format. Image files don't have to be named after ground truth. If a subfolder contains another subfolder (name does not matter), all images contained in the latter will be processed at once, as a multi-image identification request.

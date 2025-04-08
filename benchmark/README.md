@@ -32,11 +32,11 @@ How many possible determinations will you keep in the output table, for every im
 
 How many HTTP requests will you make to the Pl@ntNet API at once. Max 10, defaults to 1 (sequential).
 
-### noReject
+#### noReject
 
 Set to true to get plant species results even when top1 result is a reject class (not a plant: animal, object…)
 
-### includePredictedOrgans
+#### includePredictedOrgans
 
 Set to true to add a new `predicted_organs` column to the output file, containing the top1 predicted organ for each submited image, along with the prediction score.
 

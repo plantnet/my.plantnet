@@ -38,10 +38,22 @@ If it does not fit your needs, see below for other ways to integrate Pl@ntNet to
 ## Benchmark / batch processing
 How to run Pl@ntNet identification on a set of images, with or without a ground-truth to assess results quality.
 
+### single-species identification (classic)
+
 See [benchmark documentation](benchmark/README.md)
 
-### Node.js
+#### Node.js
 [Benchmark script](benchmark/js/benchmark.js) using Node.js
+
+#### R
+[Benchmark script](benchmark/R/benchmark.R) using R
+
+### multi-species identification (survey)
+
+See [benchmark-survey documentation](benchmark-survey/README.md)
+
+#### Node.js
+[Multi-species benchmark script](benchmark-survey/js/benchmark-survey.js) using Node.js
 
 ## Third-party libraries
 

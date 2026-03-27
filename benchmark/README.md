@@ -6,7 +6,7 @@ How to run Pl@ntNet identification on a set of images, with or without a ground-
 
 ### configuration
 
-Edit the script before running it. You'll find a few adjustable options at the top of the code.
+See "code" section below for how to configure each version of the script
 
 #### API_KEY
 
@@ -22,7 +22,7 @@ Folder where to place output files (no trailing `/`)
 
 #### projects
 
-Default value of `[ "all" ]` is acceptable for most cases. Add more projects if you wish to compare results: `[ "all", "the-plant-list", "weurope" ]` ; each image will be identified in every project) 
+Default value of `[ "all" ]` is acceptable for most cases. Add more projects if you wish to compare results: `[ "k-southwestern-europe", "k-world-flora" ]` ; each image will be identified in every project
 
 #### resultsLimit
 
@@ -82,6 +82,10 @@ Results in CSV format are written to file `./plantnet_benchmark_{date-time}.csv`
 #### install
 `npm install`
 
+#### configure
+`cp env.example.json env.json`
+then edit `env.json`
+
 #### run
 
 `nodejs benchmark.js`
@@ -98,6 +102,9 @@ R version **is not** parallelised at the moment.
 install.packages("httr")
 install.packages("wand")
 ```
+
+#### configure
+directly edit `benchmark.R`, options are at the top of the code
 
 #### run
 
